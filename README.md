@@ -1,12 +1,12 @@
-# Cajeta Prism
+# Cajeta Toffee
 
-A new ML / scientific-compute framework written in **Cajeta**. Prism is a
+A new ML / scientific-compute framework written in **Cajeta**. Toffee is a
 *consumer* of the Cajeta foundation specs — it sits on top of **cajeta-gpu**
 (value types, math, textures, memory, ray query, cooperative matrix) and
 **cajeta-xpu** (the kernel/dispatch execution model), the way the
 numpy/scipy/keras/torch ports do. It is **not** a foundation spec.
 
-The roadmap lives in `cajeta/plans/cajeta-prism-plan.md`. Two threads:
+The roadmap lives in `cajeta/plans/cajeta-toffee-plan.md`. Two threads:
 
 - **P1 — RT-as-compute spatial primitive** (research-grounded): hardware ray
   tracing repurposed as a general-purpose spatial-index accelerator
@@ -19,7 +19,7 @@ The roadmap lives in `cajeta/plans/cajeta-prism-plan.md`. Two threads:
 
 ## Layout
 
-- `src/prism/spatial/SpatialIndex.cajeta` — **P1.0**, the first real Prism code.
+- `src/toffee/spatial/SpatialIndex.cajeta` — **P1.0**, the first real Toffee code.
   A `SpatialIndex` over 3-D points with a fixed-radius `countWithin` verb. The
   index is a bottom-level acceleration structure (a BVH over per-point AABBs);
   each query is a `RayQuery` walk inside a compute kernel. The "ray tracing"
@@ -28,9 +28,9 @@ The roadmap lives in `cajeta/plans/cajeta-prism-plan.md`. Two threads:
 
 ## Status
 
-Seed / early. Prism has no standalone build/test harness yet; P1.0 is
+Seed / early. Toffee has no standalone build/test harness yet; P1.0 is
 exec-verified through the cajeta compiler's JIT test harness
-(`cajeta/test/xpu/PrismSpatialIndexDeviceTests.cpp`), which compiles
+(`cajeta/test/xpu/ToffeeSpatialIndexDeviceTests.cpp`), which compiles
 `SpatialIndex.cajeta` alongside a driver and runs it on a real ray-query-capable
-Vulkan device. A dedicated Prism build lands once the foundation's Part C items
+Vulkan device. A dedicated Toffee build lands once the foundation's Part C items
 (ray query ✓, cooperative matrix) are real.

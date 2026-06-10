@@ -1,4 +1,4 @@
-package prism.spatial;
+package toffee.spatial;
 
 import cajeta.gpu.core.AccelerationStructure;
 import cajeta.gpu.core.Buffer;
@@ -7,9 +7,9 @@ import cajeta.gpu.core.Stream;
 import cajeta.gpu.core.Thread;
 
 /**
- * SpatialIndex — Prism's RT-as-compute spatial primitive (plan P1, Stage P1.0).
+ * SpatialIndex — Toffee's RT-as-compute spatial primitive (plan P1, Stage P1.0).
  *
- * The distinctive thing Prism offers over torch/JAX: hardware ray tracing
+ * The distinctive thing Toffee offers over torch/JAX: hardware ray tracing
  * repurposed as a general-purpose spatial-index accelerator. Users build an
  * index over points and run massively-parallel neighbourhood queries; the
  * "ray tracing" (degenerate near-zero-length rays, AABB-as-index-entry) is
