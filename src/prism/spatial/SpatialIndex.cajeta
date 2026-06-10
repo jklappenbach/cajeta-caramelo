@@ -1,10 +1,10 @@
 package prism.spatial;
 
-import cajeta.xpu.core.AccelerationStructure;
-import cajeta.xpu.core.Buffer;
-import cajeta.xpu.core.RayQuery;
-import cajeta.xpu.core.Stream;
-import cajeta.xpu.core.Thread;
+import cajeta.gpu.core.AccelerationStructure;
+import cajeta.gpu.core.Buffer;
+import cajeta.gpu.core.RayQuery;
+import cajeta.gpu.core.Stream;
+import cajeta.gpu.core.Thread;
 
 /**
  * SpatialIndex — Prism's RT-as-compute spatial primitive (plan P1, Stage P1.0).
