@@ -1,10 +1,10 @@
 package caramelo.spatial;
 
-import cajeta.gpu.core.AccelerationStructure;
-import cajeta.gpu.core.Buffer;
-import cajeta.gpu.core.RayQuery;
-import cajeta.gpu.core.Stream;
-import cajeta.gpu.core.Thread;
+import cajeta.xpu.AccelerationStructure;
+import cajeta.xpu.KernelBuffer;
+import cajeta.xpu.RayQuery;
+import cajeta.xpu.KernelStream;
+import cajeta.xpu.KernelThread;
 
 /**
  * SpatialIndex — Caramelo's RT-as-compute spatial primitive (plan P1, Stage P1.0).
@@ -16,7 +16,7 @@ import cajeta.gpu.core.Thread;
  * entirely library-internal and never surfaced — the mental model is a
  * SpatialIndex, not "rays" (the verified RTNN pattern, PPoPP'22).
  *
- * It sits on the cajeta-gpu foundation: the index is a bottom-level
+ * It sits on the cajeta.xpu foundation: the index is a bottom-level
  * {@link AccelerationStructure} (a BVH over per-point AABBs) and each query is a
  * {@link RayQuery} walk inside a compute kernel — no RT pipeline, no hit shaders.
  *
@@ -75,10 +75,10 @@ public final class SpatialIndex {
      */
     @Kernel
     public static void countWithinKernel(AccelerationStructure scene,
-                                         Buffer<float32> qx, Buffer<float32> qy,
-                                         Buffer<float32> qz, Buffer<uint32> out,
+                                         KernelBuffer<float32> qx, KernelBuffer<float32> qy,
+                                         KernelBuffer<float32> qz, KernelBuffer<uint32> out,
                                          uint32 n) {
-        uint32 i = Thread.globalIdX();
+        uint32 i = KernelThread.globalIdX();
         if (i < n) {
             RayQuery rq;
             rq.initialize(scene, 0, 255,
@@ -100,10 +100,10 @@ public final class SpatialIndex {
      * qz[i]). The query buffers and `out` are caller-owned device buffers of length
      * `n`; this dispatches the internal kernel and waits for completion.
      */
-    public void countWithin(Buffer<float32> qx, Buffer<float32> qy,
-                            Buffer<float32> qz, Buffer<uint32> out, uint32 n) {
+    public void countWithin(KernelBuffer<float32> qx, KernelBuffer<float32> qy,
+                            KernelBuffer<float32> qz, KernelBuffer<uint32> out, uint32 n) {
         uint32 groups = (n + 63) / 64;
-        Stream s = Stream.current();
+        KernelStream s = KernelStream.current();
         countWithinKernel.launch(s, grid: [groups], block: [64])(
             this.bvh, qx, qy, qz, out, n);
         s.sync();
@@ -119,12 +119,12 @@ public final class SpatialIndex {
      */
     @Kernel
     public static void radiusExactKernel(AccelerationStructure scene,
-                                         Buffer<float32> dpx, Buffer<float32> dpy,
-                                         Buffer<float32> dpz,
-                                         Buffer<float32> qx, Buffer<float32> qy,
-                                         Buffer<float32> qz, Buffer<uint32> out,
+                                         KernelBuffer<float32> dpx, KernelBuffer<float32> dpy,
+                                         KernelBuffer<float32> dpz,
+                                         KernelBuffer<float32> qx, KernelBuffer<float32> qy,
+                                         KernelBuffer<float32> qz, KernelBuffer<uint32> out,
                                          uint32 n, float32 radius) {
-        uint32 i = Thread.globalIdX();
+        uint32 i = KernelThread.globalIdX();
         if (i < n) {
             float32 r2 = radius * radius;
             RayQuery rq;
@@ -156,12 +156,12 @@ public final class SpatialIndex {
      * index's build radius must be >= `radius` (so every L2 neighbour is a box
      * candidate).
      */
-    public void radiusExact(Buffer<float32> dpx, Buffer<float32> dpy,
-                            Buffer<float32> dpz, Buffer<float32> qx,
-                            Buffer<float32> qy, Buffer<float32> qz,
-                            Buffer<uint32> out, uint32 n, float32 radius) {
+    public void radiusExact(KernelBuffer<float32> dpx, KernelBuffer<float32> dpy,
+                            KernelBuffer<float32> dpz, KernelBuffer<float32> qx,
+                            KernelBuffer<float32> qy, KernelBuffer<float32> qz,
+                            KernelBuffer<uint32> out, uint32 n, float32 radius) {
         uint32 groups = (n + 63) / 64;
-        Stream s = Stream.current();
+        KernelStream s = KernelStream.current();
         radiusExactKernel.launch(s, grid: [groups], block: [64])(
             this.bvh, dpx, dpy, dpz, qx, qy, qz, out, n, radius);
         s.sync();
