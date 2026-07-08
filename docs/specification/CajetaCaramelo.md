@@ -1,12 +1,12 @@
-# cajeta.toffee — Toffee
+# cajeta.caramelo — Caramelo
 
-> **Status: design spec — almost entirely unbuilt.** Toffee is the **modern
+> **Status: design spec — almost entirely unbuilt.** Caramelo is the **modern
 > successor to PyTorch**: it aims to provide the full capability torch offers
 > today (tensors, reverse-mode autograd/backprop, modules, optimizers, data
 > pipelines) redesigned for cajeta, **and** a first-class **SPELA forward-
 > propagation training framework** for exploring new classes of training
 > algorithms that operate on functioning models. These are two co-equal axes,
-> not alternatives (see `plans/cajeta-toffee-plan.md`):
+> not alternatives (see `plans/cajeta-caramelo-plan.md`):
 >
 > 1. **Conventional / torch-parity path** — reverse-mode autograd, `nn`-style
 >    modules, optimizers. Everything a torch user expects, with shape, dtype,
@@ -21,13 +21,13 @@
 >    propagation training" below.
 >
 > As of this writing **almost none of either axis is implemented.** What ships
-> today lives in the sibling `cajeta-toffee` repo under package `toffee.*` (not
-> `cajeta.toffee.*`): `src/toffee/spatial/SpatialIndex.cajeta` (the RT-as-compute
+> today lives in the sibling `cajeta-caramelo` repo under package `caramelo.*` (not
+> `cajeta.caramelo.*`): `src/caramelo/spatial/SpatialIndex.cajeta` (the RT-as-compute
 > spatial index — see "What exists today (shipped)"). Everything else here is
 > **planned**, including the `cajeta.math.tensor.Tensor` backing referenced
 > throughout (`cajeta.math` currently ships only `Matrix`).
 
-A specification for `cajeta.toffee`, a deep-learning framework
+A specification for `cajeta.caramelo`, a deep-learning framework
 designed from first principles for cajeta — leveraging the type
 system, ownership model, fiber runtime, and `cajeta.math` numerical
 foundation. Not a port of any existing framework. The goal is to
@@ -36,15 +36,15 @@ Flax / Burn / MLX and ask: what would the framework look like if
 designed today, in a language with cajeta's properties, without
 backward compatibility constraints?
 
-For the PyTorch migration target, see `CajetaTorch.md`. cajeta.toffee
+For the PyTorch migration target, see `CajetaTorch.md`. cajeta.caramelo
 and cajeta.torch coexist; they have different audiences and different
 goals. Most users will pick one or the other for a given project.
 
 Implementation lands incrementally as `.cajeta` files in the sibling
-`cajeta-toffee` repo under `src/toffee/` (current seed package: `toffee.*`).
-Ships as its own package. (The `cajeta.toffee.*` module names used throughout
-this document are aspirational; the seed code uses the shorter `toffee.*`
-namespace — e.g. the shipped `package toffee.spatial`.)
+`cajeta-caramelo` repo under `src/caramelo/` (current seed package: `caramelo.*`).
+Ships as its own package. (The `cajeta.caramelo.*` module names used throughout
+this document are aspirational; the seed code uses the shorter `caramelo.*`
+namespace — e.g. the shipped `package caramelo.spatial`.)
 
 ## Why a separate library from cajeta.torch
 
@@ -66,7 +66,7 @@ Transformations like `grad`, `jit`, `vmap`, `pmap` are language-
 native: they take pure functions and return pure functions, and
 the compiler can reason about them.
 
-cajeta.toffee is for users who:
+cajeta.caramelo is for users who:
 - Are starting fresh, not porting a PyTorch repo.
 - Want compile-time guarantees on shape, dtype, gradient flow.
 - Want functional transformations as a primary tool, not bolt-on.
@@ -89,9 +89,9 @@ cajeta.toffee is for users who:
   emits the backward pass at compile time. This is the torch-parity
   axis — full reverse-mode training, redesigned for cajeta.
 - **Forward-propagation training as a first-class path.** Alongside
-  backprop, Toffee ships **SPELA** — single-forward-pass, per-layer
+  backprop, Caramelo ships **SPELA** — single-forward-pass, per-layer
   local-loss training with no global backprop (see the
-  `cajeta.toffee.spela` section). It needs no reverse-mode autodiff,
+  `cajeta.caramelo.spela` section). It needs no reverse-mode autodiff,
   enables early-exit inference, and adapts already-functioning models
   to drifting streams cheaply enough for edge devices. This is the
   distinctive axis, not an afterthought.
@@ -131,7 +131,7 @@ cajeta.toffee is for users who:
 ## Non-goals (v1)
 
 - **PyTorch API parity.** That's cajeta.torch's job. Migrating
-  PyTorch code to cajeta.toffee is a rewrite, not a port.
+  PyTorch code to cajeta.caramelo is a rewrite, not a port.
 - **Python interop / dynamic shape inference at runtime.** Shapes
   that are unknown at compile time are supported but reported
   warning-level (compiler can't optimize as hard). No "shape comes
@@ -140,7 +140,7 @@ cajeta.toffee is for users who:
   `Device` type parameter exists; only `CPU` resolves. Backend
   abstraction designed in so accelerators slot in cleanly.
 - **Pre-trained model zoo.** No bundled weights. Model definitions
-  may live in a sibling package (`cajeta.toffee.models`); weights are
+  may live in a sibling package (`cajeta.caramelo.models`); weights are
   loaded from external sources via the checkpoint format.
 - **Visual / dashboard tooling.** No built-in TensorBoard
   equivalent. Logging is structured (json-lines); a separate
@@ -152,78 +152,78 @@ cajeta.toffee is for users who:
 ## Package layout
 
 ```
-cajeta.toffee.tensor       — Typed Tensor, Shape, DType, Device,
+cajeta.caramelo.tensor       — Typed Tensor, Shape, DType, Device,
                             factory functions, ops, broadcasting,
                             indexing, shape ops
-cajeta.toffee.autograd     — grad, value_and_grad, jacobian, hessian,
+cajeta.caramelo.autograd     — grad, value_and_grad, jacobian, hessian,
                             jvp, vjp, gradient surrogates (torch-parity axis)
-cajeta.toffee.spela        — SpelaTrainer, SpelaConfig, symmetric-vector
+cajeta.caramelo.spela        — SpelaTrainer, SpelaConfig, symmetric-vector
                             embeddings, per-layer local losses; forward-only
                             training + online adaptation (no backprop axis)
-cajeta.toffee.spatial      — RT-as-compute spatial index (kNN / fixed-radius
+cajeta.caramelo.spatial      — RT-as-compute spatial index (kNN / fixed-radius
                             via hardware ray query); the one package that
                             ships today. Feeds GNN / cooperative-matrix ops.
-cajeta.toffee.transform    — jit, vmap, pmap, scan, checkpoint, remat
-cajeta.toffee.random       — RngKey, split, normal, uniform,
+cajeta.caramelo.transform    — jit, vmap, pmap, scan, checkpoint, remat
+cajeta.caramelo.random       — RngKey, split, normal, uniform,
                             categorical, ... (PRNG-key-threaded)
-cajeta.toffee.module       — Module trait, Parameter wrapper,
+cajeta.caramelo.module       — Module trait, Parameter wrapper,
                             tree_map / tree_flatten over module
                             parameter trees, parameter init
-cajeta.toffee.layer        — Linear, Conv*, BN, LN, RMSNorm,
+cajeta.caramelo.layer        — Linear, Conv*, BN, LN, RMSNorm,
                             Dropout, Embedding, Attention,
                             TransformerBlock — immutable structs
-cajeta.toffee.act          — relu, gelu, silu, mish, softmax, ...
+cajeta.caramelo.act          — relu, gelu, silu, mish, softmax, ...
                             (pure functions; no Module wrapper)
-cajeta.toffee.loss         — mse, cross_entropy, kl_div, ... (pure
+cajeta.caramelo.loss         — mse, cross_entropy, kl_div, ... (pure
                             functions, not Module instances)
-cajeta.toffee.optim        — optimizer state as data; init / step
+cajeta.caramelo.optim        — optimizer state as data; init / step
                             return new state; SGD, Adam, AdamW,
                             Lion, Adafactor, ...
-cajeta.toffee.schedule     — LR schedules as pure functions of step ->
+cajeta.caramelo.schedule     — LR schedules as pure functions of step ->
                             lr; cosine, warmup-then-decay, polynomial
-cajeta.toffee.data         — Dataset, Loader (fiber pool, bounded
+cajeta.caramelo.data         — Dataset, Loader (fiber pool, bounded
                             prefetch), Sampler, collate
-cajeta.toffee.checkpoint   — Pure binary save / load. No pickle.
+cajeta.caramelo.checkpoint   — Pure binary save / load. No pickle.
                             Versioned format; safetensors-compatible
                             tensor encoding.
-cajeta.toffee.distribute   — Mesh, ShardingSpec, pjit, pmap,
+cajeta.caramelo.distribute   — Mesh, ShardingSpec, pjit, pmap,
                             collectives (all_reduce, all_gather,
                             reduce_scatter, broadcast)
-cajeta.toffee.distributions — Normal, Categorical, Bernoulli, ...,
+cajeta.caramelo.distributions — Normal, Categorical, Bernoulli, ...,
                              with reparameterizable / score-function
                              gradient choice
-cajeta.toffee.metric       — Pure-function metrics (accuracy,
+cajeta.caramelo.metric       — Pure-function metrics (accuracy,
                             precision, recall, F1, AUC, ...) plus
                             a stateful Aggregator wrapper for
                             running totals across batches
-cajeta.toffee.text         — Tokenizer trait + BPE / Unigram /
+cajeta.caramelo.text         — Tokenizer trait + BPE / Unigram /
                             WordPiece implementations; the bare
                             minimum to build language-model pipelines
-cajeta.toffee.vision       — Image loaders (jpeg / png), augmentation
+cajeta.caramelo.vision       — Image loaders (jpeg / png), augmentation
                             ops (resize, crop, flip, color jitter),
                             ToTensor / Normalize
-cajeta.toffee.profile      — Op-level timing, memory tracing, flop
+cajeta.caramelo.profile      — Op-level timing, memory tracing, flop
                             counting; outputs structured json-lines
 ```
 
 Deferred to follow-ups:
 ```
-cajeta.toffee.models           — Curated model definitions
-cajeta.toffee.cuda             — CUDA backend
-cajeta.toffee.metal            — Metal backend
-cajeta.toffee.serve            — Inference serving
-cajeta.toffee.export           — ONNX / SavedModel export
-cajeta.toffee.compile          — XLA-equivalent graph compiler
+cajeta.caramelo.models           — Curated model definitions
+cajeta.caramelo.cuda             — CUDA backend
+cajeta.caramelo.metal            — Metal backend
+cajeta.caramelo.serve            — Inference serving
+cajeta.caramelo.export           — ONNX / SavedModel export
+cajeta.caramelo.compile          — XLA-equivalent graph compiler
 ```
 
 ---
 
 ## What exists today (shipped)
 
-Exactly one piece of Toffee is implemented, and it is **not** part of the
+Exactly one piece of Caramelo is implemented, and it is **not** part of the
 tensor / autograd surface below: the **RT-as-compute spatial index** (plan P1,
-Stage P1.0), in the sibling `cajeta-toffee` repo at
-`src/toffee/spatial/SpatialIndex.cajeta` (package `toffee.spatial`). None of the
+Stage P1.0), in the sibling `cajeta-caramelo` repo at
+`src/caramelo/spatial/SpatialIndex.cajeta` (package `caramelo.spatial`). None of the
 tensor / autograd / module / optimizer APIs in the rest of this document exist
 yet.
 
@@ -236,7 +236,7 @@ user-facing model is a spatial index. It is built directly on the
 `Stream`, `Thread`).
 
 ```cajeta
-package toffee.spatial;
+package caramelo.spatial;
 
 public final class SpatialIndex {
     // Build an index over `count` 3-D points (packed xyz, 3 float32/point),
@@ -260,16 +260,16 @@ public final class SpatialIndex {
 ```
 
 Status: `countWithin` is exec-verified through the cajeta compiler's JIT test
-harness (`test/xpu/ToffeeSpatialIndexDeviceTests.cpp`) on a real,
+harness (`test/xpu/CarameloSpatialIndexDeviceTests.cpp`) on a real,
 ray-query-capable Vulkan device — gated to SKIP when either the device or the
 sibling source is absent. `radiusExact` is the P1.1 exact-L2 follow-up (in
-source). Toffee has no standalone build yet. The other planned query verbs
+source). Caramelo has no standalone build yet. The other planned query verbs
 (`knn`, `radius`, `range`, `contains`) and the compute fallback are later P1
 stages — **not started**.
 
 ---
 
-## cajeta.toffee.tensor
+## cajeta.caramelo.tensor
 
 The foundational type. Shape, dtype, device, and grad-tracking all
 live in the type. The elements are stored in a `cajeta.math.tensor.
@@ -353,7 +353,7 @@ optimization opportunities of statically-known shapes.
 
 ---
 
-## cajeta.toffee.autograd
+## cajeta.caramelo.autograd
 
 Pure-function-shaped automatic differentiation. `grad(fn)` returns a
 new function that computes the gradient of `fn` at any input. No
@@ -389,7 +389,7 @@ public enum Surrogate {
 ```
 
 Implementation: when `fn` is composed of registered primitives (the
-ops defined in `cajeta.toffee.tensor`), the compiler generates the
+ops defined in `cajeta.caramelo.tensor`), the compiler generates the
 backward pass at compile time. User code never sees a graph object.
 Higher-order derivatives compose naturally — `grad(grad(fn))` is a
 function, not a special case.
@@ -400,15 +400,15 @@ training that needs none of this machinery.
 
 ---
 
-## cajeta.toffee.spela — forward-propagation training
+## cajeta.caramelo.spela — forward-propagation training
 
-Toffee's distinctive training axis is **SPELA(O)** — *Solo Pass Embedded
+Caramelo's distinctive training axis is **SPELA(O)** — *Solo Pass Embedded
 Learning Algorithm*. It trains a network with **local, per-layer losses in a
 single forward sweep — no global backprop**, which makes it a natural fit for
 on-device, streaming, and continual-learning workloads, and a testbed for new
 training algorithms that operate on already-functioning models. The canonical
 reference implementation (PyTorch + TF/Keras) lives in `~/code/ml/spela-training`
-(`SpelaTrainer`, `SpelaConfig`); this section is the planned Toffee surface, not
+(`SpelaTrainer`, `SpelaConfig`); this section is the planned Caramelo surface, not
 yet built.
 
 ### How it works
@@ -469,14 +469,14 @@ backward graph, no second pass — which is what makes it viable on edge devices
 
 The SPELA path needs **no reverse-mode autodiff**: the per-layer local loss and
 its gradient are single-layer / closed-form, so none of the
-`cajeta.toffee.autograd` machinery above is required for it. Reverse-mode is only
-pulled in for the torch-parity workloads. The two axes share Toffee's tensor,
+`cajeta.caramelo.autograd` machinery above is required for it. Reverse-mode is only
+pulled in for the torch-parity workloads. The two axes share Caramelo's tensor,
 module, optimizer, and data-loading layers but diverge entirely in how loss and
 parameter updates flow.
 
 ---
 
-## cajeta.toffee.transform
+## cajeta.caramelo.transform
 
 Functional transformations. Each takes a pure function and returns a
 pure function. Composable in any order: `jit(grad(vmap(fn)))` is a
@@ -516,7 +516,7 @@ deep models that don't fit activations in memory.
 
 ---
 
-## cajeta.toffee.random
+## cajeta.caramelo.random
 
 JAX-style explicit RNG keys. No global state. Two runs with the
 same `RngKey` produce bit-identical results.
@@ -556,7 +556,7 @@ with the same seed get the same numbers, period.
 
 ---
 
-## cajeta.toffee.module
+## cajeta.caramelo.module
 
 Modules are immutable structs of parameters. There is no
 `.train()` flag, no `.eval()` flag, no hidden state. A `Module`'s
@@ -608,7 +608,7 @@ parameters / inputs:
 
 ---
 
-## cajeta.toffee.layer
+## cajeta.caramelo.layer
 
 Layers are immutable structs of parameters with a synthesized
 `apply` method. Transformer block as the canonical example:
@@ -673,7 +673,7 @@ Layer set for v1: `Linear`, `Conv1d/2d/3d`, `BatchNorm*d`, `LayerNorm`,
 
 ---
 
-## cajeta.toffee.optim
+## cajeta.caramelo.optim
 
 Optimizer state is data; `init` and `step` are pure functions; no
 optimizer object holds parameters in a hidden ref-keep cycle.
@@ -743,7 +743,7 @@ contract.
 
 ---
 
-## cajeta.toffee.distribute
+## cajeta.caramelo.distribute
 
 Designed in from day one. A `Mesh` is a typed grid of devices; a
 `ShardingSpec` says how a tensor's axes map to mesh axes;
@@ -781,7 +781,7 @@ fall-through).
 
 ---
 
-## cajeta.toffee.checkpoint
+## cajeta.caramelo.checkpoint
 
 Pure binary format. No pickle. No language-specific code paths.
 Versioned header + tensor records.
@@ -819,7 +819,7 @@ Format:
 ```
 
 Compatible with safetensors at the tensor-encoding layer (same byte
-representation per dtype) so `cajeta.toffee.checkpoint` and
+representation per dtype) so `cajeta.caramelo.checkpoint` and
 `safetensors` files round-trip.
 
 ---
@@ -828,43 +828,43 @@ representation per dtype) so `cajeta.toffee.checkpoint` and
 
 A reasonable order, given dependencies:
 
-1. **cajeta.toffee.tensor** with statically-known shapes only first.
+1. **cajeta.caramelo.tensor** with statically-known shapes only first.
    Type-level shape arithmetic, broadcast / matmul / reshape /
    reductions. Wraps cajeta.math.tensor.Tensor for storage.
-2. **cajeta.toffee.random.** RngKey + split + the standard
+2. **cajeta.caramelo.random.** RngKey + split + the standard
    distributions. Self-contained, low dependency.
-3. **cajeta.toffee.autograd: grad / value_and_grad** for functions
+3. **cajeta.caramelo.autograd: grad / value_and_grad** for functions
    over the tensor type. Compile-time backward generation. Validates
    the type-level grad-mode design end-to-end.
-4. **cajeta.toffee.module + a small layer set** (`Linear`,
+4. **cajeta.caramelo.module + a small layer set** (`Linear`,
    `LayerNorm`, `Dropout`). Parameter-walk synthesis. Training loop
    shape works.
-5. **cajeta.toffee.optim: SGD + Adam.** Pure-function step. Trains
+5. **cajeta.caramelo.optim: SGD + Adam.** Pure-function step. Trains
    an MLP end-to-end on toy data.
-6. **cajeta.toffee.transform: jit.** Function compilation. The trace
+6. **cajeta.caramelo.transform: jit.** Function compilation. The trace
    sees a typed function and lowers it to optimized kernels. Big
    payoff: no per-op Python-level overhead, even before any GPU
    support.
-7. **cajeta.toffee.transform: vmap + scan.** Per-example gradients,
+7. **cajeta.caramelo.transform: vmap + scan.** Per-example gradients,
    compiled loops. Many existing models become much terser.
-8. **cajeta.toffee.layer: convolutions + attention.** Transformer
+8. **cajeta.caramelo.layer: convolutions + attention.** Transformer
    block. Language-model training reachable.
-9. **cajeta.toffee.checkpoint.** Binary save/load. Resumable
+9. **cajeta.caramelo.checkpoint.** Binary save/load. Resumable
    training loops.
-10. **cajeta.toffee.data.** Dataset + Loader (fiber pool +
+10. **cajeta.caramelo.data.** Dataset + Loader (fiber pool +
     bounded prefetch). Real datasets.
-11. **cajeta.toffee.distribute: Mesh + pjit + collectives.**
+11. **cajeta.caramelo.distribute: Mesh + pjit + collectives.**
     Multi-CPU sharding works first; multi-host comes once
     cajeta.io.net is in.
-12. **cajeta.toffee.transform: pmap.** Layered on distribute.
-13. **cajeta.toffee.autograd: jvp + vjp + jacobian + hessian.**
+12. **cajeta.caramelo.transform: pmap.** Layered on distribute.
+13. **cajeta.caramelo.autograd: jvp + vjp + jacobian + hessian.**
     Higher-order derivatives. Useful for second-order optimizers
     and Bayesian methods.
-14. **cajeta.toffee.distributions.** Reparameterizable + score-
+14. **cajeta.caramelo.distributions.** Reparameterizable + score-
     function gradient choices. Hooks autograd.
-15. **cajeta.toffee.text + cajeta.toffee.vision + cajeta.toffee.metric.**
+15. **cajeta.caramelo.text + cajeta.caramelo.vision + cajeta.caramelo.metric.**
     Domain-flavored extensions. Independent of each other.
-16. **cajeta.toffee.profile.** Op-level timing and memory tracing.
+16. **cajeta.caramelo.profile.** Op-level timing and memory tracing.
     Hooks the same trace path that `jit` uses.
 
 The gating step is (1) — every other layer touches the typed tensor
@@ -873,11 +873,11 @@ design choice (compile-time backward generation) determines the
 shape of every transformation that follows.
 
 Deferred to follow-ups (separate libraries):
-- cajeta.toffee.cuda / cajeta.toffee.metal — accelerator backends
-- cajeta.toffee.compile — XLA-equivalent graph compiler
-- cajeta.toffee.export — ONNX / SavedModel export
-- cajeta.toffee.serve — inference serving
-- cajeta.toffee.models — curated model implementations
+- cajeta.caramelo.cuda / cajeta.caramelo.metal — accelerator backends
+- cajeta.caramelo.compile — XLA-equivalent graph compiler
+- cajeta.caramelo.export — ONNX / SavedModel export
+- cajeta.caramelo.serve — inference serving
+- cajeta.caramelo.models — curated model implementations
 
 ---
 
@@ -910,7 +910,7 @@ Deferred to follow-ups (separate libraries):
   exclusive? PyTorch's trailing-underscore convention is one
   option; another is no in-place API at all and rely on the
   compiler. Lean: no in-place API; trust the optimizer.
-- **Tensor backing relationship with cajeta.math.tensor.** toffee's
+- **Tensor backing relationship with cajeta.math.tensor.** caramelo's
   Tensor wraps cajeta.math.tensor's. Round-trip across libraries
   should be zero-copy via the shared backing buffer; same question
   raised in CajetaMath.md / CajetaTorch.md. Cohesive resolution

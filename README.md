@@ -6,9 +6,9 @@ A new ML / scientific-compute framework written in **Cajeta**. Caramelo is a
 **cajeta-xpu** (the kernel/dispatch execution model), the way the
 numpy/scipy/keras/torch ports do. It is **not** a foundation spec.
 
-The design spec lives in `docs/specification/CajetaToffee.md` (relocated here
+The design spec lives in `docs/specification/CajetaCaramelo.md` (relocated here
 from the foundation repo). The roadmap lives in
-`cajeta/plans/cajeta-toffee-plan.md`. Two threads:
+`cajeta/plans/cajeta-caramelo-plan.md`. Two threads:
 
 - **P1 — RT-as-compute spatial primitive** (research-grounded): hardware ray
   tracing repurposed as a general-purpose spatial-index accelerator
@@ -21,8 +21,7 @@ from the foundation repo). The roadmap lives in
 
 ## Layout
 
-- `src/toffee/spatial/SpatialIndex.cajeta` — **P1.0**, the first real Caramelo code
-  (the `toffee.*` package/dir name is a pending code rename; see Status).
+- `src/caramelo/spatial/SpatialIndex.cajeta` — **P1.0**, the first real Caramelo code.
   A `SpatialIndex` over 3-D points with a fixed-radius `countWithin` verb. The
   index is a bottom-level acceleration structure (a BVH over per-point AABBs);
   each query is a `RayQuery` walk inside a compute kernel. The "ray tracing"
@@ -33,11 +32,7 @@ from the foundation repo). The roadmap lives in
 
 Seed / early. Caramelo has no standalone build/test harness yet; P1.0 is
 exec-verified through the cajeta compiler's JIT test harness
-(`cajeta/test/xpu/ToffeeSpatialIndexDeviceTests.cpp`), which compiles
+(`cajeta/test/xpu/CarameloSpatialIndexDeviceTests.cpp`), which compiles
 `SpatialIndex.cajeta` alongside a driver and runs it on a real ray-query-capable
 Vulkan device. A dedicated Caramelo build lands once the foundation's Part C items
 (ray query ✓, cooperative matrix) are real.
-
-The framework was renamed **Toffee → Caramelo**; the source tree still uses
-the `toffee.*` package and `src/toffee/` directory (and the foundation-repo
-test `ToffeeSpatialIndexDeviceTests.cpp`) pending that code-level rename.
