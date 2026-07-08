@@ -1,12 +1,14 @@
-# Cajeta Toffee
+# Cajeta Caramelo
 
-A new ML / scientific-compute framework written in **Cajeta**. Toffee is a
+A new ML / scientific-compute framework written in **Cajeta**. Caramelo is a
 *consumer* of the Cajeta foundation specs — it sits on top of **cajeta-gpu**
 (value types, math, textures, memory, ray query, cooperative matrix) and
 **cajeta-xpu** (the kernel/dispatch execution model), the way the
 numpy/scipy/keras/torch ports do. It is **not** a foundation spec.
 
-The roadmap lives in `cajeta/plans/cajeta-toffee-plan.md`. Two threads:
+The design spec lives in `docs/specification/CajetaToffee.md` (relocated here
+from the foundation repo). The roadmap lives in
+`cajeta/plans/cajeta-toffee-plan.md`. Two threads:
 
 - **P1 — RT-as-compute spatial primitive** (research-grounded): hardware ray
   tracing repurposed as a general-purpose spatial-index accelerator
@@ -19,7 +21,8 @@ The roadmap lives in `cajeta/plans/cajeta-toffee-plan.md`. Two threads:
 
 ## Layout
 
-- `src/toffee/spatial/SpatialIndex.cajeta` — **P1.0**, the first real Toffee code.
+- `src/toffee/spatial/SpatialIndex.cajeta` — **P1.0**, the first real Caramelo code
+  (the `toffee.*` package/dir name is a pending code rename; see Status).
   A `SpatialIndex` over 3-D points with a fixed-radius `countWithin` verb. The
   index is a bottom-level acceleration structure (a BVH over per-point AABBs);
   each query is a `RayQuery` walk inside a compute kernel. The "ray tracing"
@@ -28,9 +31,13 @@ The roadmap lives in `cajeta/plans/cajeta-toffee-plan.md`. Two threads:
 
 ## Status
 
-Seed / early. Toffee has no standalone build/test harness yet; P1.0 is
+Seed / early. Caramelo has no standalone build/test harness yet; P1.0 is
 exec-verified through the cajeta compiler's JIT test harness
 (`cajeta/test/xpu/ToffeeSpatialIndexDeviceTests.cpp`), which compiles
 `SpatialIndex.cajeta` alongside a driver and runs it on a real ray-query-capable
-Vulkan device. A dedicated Toffee build lands once the foundation's Part C items
+Vulkan device. A dedicated Caramelo build lands once the foundation's Part C items
 (ray query ✓, cooperative matrix) are real.
+
+The framework was renamed **Toffee → Caramelo**; the source tree still uses
+the `toffee.*` package and `src/toffee/` directory (and the foundation-repo
+test `ToffeeSpatialIndexDeviceTests.cpp`) pending that code-level rename.
